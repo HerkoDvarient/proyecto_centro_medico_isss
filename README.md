@@ -5,7 +5,7 @@ Este proyecto es una aplicación web estructurada para gestionar el inventario y
 ## 1. Requisitos Previos (Software necesario)
 Antes de probar la aplicación, asegurar tener instalados los siguientes programas en su computadora:
 1. **Node.js**: Necesario para ejecutar el entorno de React. (Descargar en [nodejs.org](https://nodejs.org/)).
-2. **Git**: Para poder clonar este repositorio en tu máquina. (Descargar en [git-scm.com](https://git-scm.com/)).
+2. **Git**: Para poder clonar este repositorio en su máquina. (Descargar en [git-scm.com](https://git-scm.com/)).
 
 ---
 
