@@ -3,7 +3,7 @@
 Este proyecto es una aplicación web estructurada para gestionar el inventario y la logística de insumos médicos. El sistema contempla un Frontend creado con React y Vite, y un Backend con Node.js y SQL Server. 
 
 ## 1. Requisitos Previos (Software necesario)
-Antes de probar la aplicación, asegúrate de tener instalados los siguientes programas en tu computadora:
+Antes de probar la aplicación, asegurar tener instalados los siguientes programas en su computadora:
 1. **Node.js**: Necesario para ejecutar el entorno de React. (Descargar en [nodejs.org](https://nodejs.org/)).
 2. **Git**: Para poder clonar este repositorio en tu máquina. (Descargar en [git-scm.com](https://git-scm.com/)).
 
