@@ -16,7 +16,7 @@ Abrir una terminal (PowerShell, CMD o la terminal de Visual Studio Code) y ejecu
 git clone https://github.com/Sebas02w/proyecto_centro_medico_isss
 ```
 ## 3. Configuración y Encendido del Frontend
-Una vez descargado el código se debe de ingresar a la carpeta principal del proyecto y por último a la subcarpeta frontend-logistoca con los siguientes comando: cd proyecto_centro_medico_isss, cd frontend-logistica.
+Una vez descargado el código se debe de ingresar a la carpeta principal del proyecto y por último a la subcarpeta frontend-logistica con los siguientes comandos: cd proyecto_centro_medico_isss, cd frontend-logistica.
 Instalar las dependencias necesarias con el siguiente comando: npm install.
 Encender el servidor de pruebas de Vite: npm run dev.
 
