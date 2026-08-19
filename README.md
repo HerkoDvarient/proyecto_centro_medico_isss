@@ -24,7 +24,7 @@ Encender el servidor de pruebas de Vite con el comando: npm run dev.
 Abrir un navegador web e ingresar a la siguiente dirección: http://localhost:5173, allí podrá visualizarse el diseño inicial de la versión web de la aplicación.
 
 # Aclaración Importante
-Hasta este momento se han programado algunas funcionalidades para manejar la información entre la aplicación web y la base de datos. Sin embargo, la base de datos y el backend necesitan algunos ajustes adicionales antes de estar completamente integrados.
+Hasta este momento se han programado algunas funcionalidades para manejar la información entre la aplicación web y la base de datos. Sin embargo, la base de datos y el backend necesitan algunos ajustes adicionales antes de estar completamente integrados y funcionales.
 
 Por el momento solo se podrá visualizar el diseño web inicial (Fase 1) y en la versión final (fase 2 del proyecto) todo estará integrado y se podrán probar todas las funcionalidades.
 
