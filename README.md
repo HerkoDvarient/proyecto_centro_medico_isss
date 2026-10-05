@@ -1,32 +1,61 @@
-# Sistema de Monitoreo Logístico - Unidad Médica Cojutepeque
+# Sistema de Monitoreo Logístico - Unidad Médica de Cojutepeque
 
-Este proyecto es una aplicación web estructurada para gestionar el inventario y la logística de insumos médicos. El sistema contempla un Frontend creado con React y Vite, y un Backend con Node.js y SQL Server. 
+## Descripción del Proyecto
 
-## 1. Requisitos Previos (Software necesario)
-Antes de probar la aplicación, asegurar tener instalados los siguientes programas en su computadora:
-1. **Node.js**: Necesario para ejecutar el entorno de React. (Descargar en [nodejs.org](https://nodejs.org/)).
-2. **Git**: Para poder clonar este repositorio en su máquina. (Descargar en [git-scm.com](https://git-scm.com/)).
+Este proyecto consiste en el desarrollo de una aplicación web diseñada para mejorar y modernizar la gestión logística de los insumos en la Unidad Médica de Cojutepeque, centralizando la información para facilitar el control logístico y la toma de decisiones.
 
----
+## Módulos Principales
 
-## 2. Clonar el Repositorio
-Abrir una terminal (PowerShell, CMD o la terminal de Visual Studio Code) y ejecutar el siguiente comando para descargar el código:
+La aplicación web se divide actualmente en tres módulos funcionales enfocados en la rapidez de uso:
+
+1. **Inventario General:** Una tabla unificada que consolida todos los datos de los insumos, equipada con etiquetas semaforizadas (**Bueno, Regular, Descarte**) para una lectura visual rápida.
+
+2. **Buscar Insumo:** Un buscador centralizado por **Código CeCo** o **Número de Inventario** que despliega una "Tarjeta de Perfil" detallada del insumo con opciones para editar o eliminar.
+
+3. **Registrar Insumo:** Un formulario limpio estructurado en dos columnas para dar de alta nuevos equipos de manera intuitiva y simétrica.
+
+## Diseño e Interfaz (UI/UX)
+
+El desarrollo frontend sigue una filosofía de **minimalismo pulido** enfocado en el sector salud.
+
+- **Paleta de Colores:** Uso de tonos blancos, grises y un azul marino institucional (`#1C3F8E`), reservando los colores llamativos únicamente para alertas y estados físicos.
+- **Iconografía:** Integración de la librería `lucide-react` para mantener íconos vectoriales consistentes, limpios y elegantes en la barra lateral y botones.
+- **Responsive:** Diseño preparado para ser adaptable y fluido sin saturar la visión del usuario.
+
+## Tecnologías Utilizadas 
+
+- **Frontend:** React.js inicializado y optimizado con Vite.
+- **Backend:** API REST construida con Node.js y Express.
+- **Base de Datos (Próximamente):** Preparado para integración con un motor SQL (MySQL/SQL Server) mediante el patrón Modelo-Vista-Controlador (MVC).
+
+## Cómo ejecutar el proyecto en local
+
+El proyecto cuenta con una arquitectura separada para el cliente y el servidor. Para probar la aplicación, sigue estos pasos:
+
+### 1. Inicializar el Frontend (React + Vite)
+
+Abre una terminal en la carpeta `frontend-logistica` y ejecuta:
 
 ```bash
-git clone https://github.com/Sebas02w/proyecto_centro_medico_isss
+npm install
+npm run dev
 ```
-## 3. Configuración y Encendido del Frontend
-Una vez descargado el código se debe de ingresar a la carpeta principal del proyecto y por último a la subcarpeta frontend-logistica con los siguientes comandos: cd proyecto_centro_medico_isss, cd frontend-logistica.
-Instalar las dependencias necesarias con el siguiente comando: npm install.
-Encender el servidor de pruebas de Vite con el comando: npm run dev.
 
-## 4. Visualizar el diseño web inicial
-Abrir un navegador web e ingresar a la siguiente dirección: http://localhost:5173, allí podrá visualizarse el diseño inicial de la versión web de la aplicación.
+La aplicación web estará disponible en:
 
-# Aclaración Importante
-Hasta este momento se han programado algunas funcionalidades para manejar la información entre la aplicación web y la base de datos. Sin embargo, la base de datos y el backend necesitan algunos ajustes adicionales antes de estar completamente integrados y funcionales.
+**http://localhost:5173**
 
-Por el momento solo se podrá visualizar el diseño web inicial (Fase 1) y en la versión final (fase 2 del proyecto) todo estará integrado y se podrán probar todas las funcionalidades.
+### 2. Inicializar el Backend (Node.js)
 
+Abre una segunda terminal en la carpeta `backend-logistica` y ejecuta:
 
+```bash
+npm install
+node server.js
+```
 
+El servidor que expone la API estará escuchando en:
+
+**http://localhost:3000**
+
+> **Nota actual del desarrollo:** El frontend y la estructura del backend (Rutas, Controladores y Modelos) ya están completamente definidos. La inyección de la base de datos oficial se encuentra en fase de acoplamiento.
