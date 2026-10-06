@@ -45,7 +45,27 @@ La aplicación web estará disponible en:
 
 **http://localhost:5173**
 
-### 2. Inicializar el Backend (Node.js)
+### 2. Configurar SQL Server
+
+Antes de ejecutar el servidor backend, es necesario habilitar la conexión TCP/IP de SQL Server y establecer el puerto `1433`.
+
+#### 1. Abrir Administrador de configuración
+
+Abre el **Administrador de configuración de SQL Server (SQL Server Configuration Manager)** y acepta los permisos de administrador.
+
+#### 2. Habilitar TCP/IP
+
+En el panel izquierdo, despliega **Configuración de red de SQL Server** y selecciona **Protocolos de MSSQLSERVER** (o **SQLEXPRESS**). Haz clic derecho sobre **TCP/IP** y selecciona **Habilitar**.
+
+#### 3. Fijar el Puerto 1433
+
+Haz clic derecho en **TCP/IP** y selecciona **Propiedades**. Ve a la pestaña **Direcciones IP**, baja hasta la sección **IPAll**, borra cualquier número en **Puertos dinámicos TCP** y escribe `1433` en el campo **Puerto TCP**.
+
+#### 4. Reiniciar el Servicio
+
+Aplica los cambios y reinicia el servicio de **SQL Server** para que la nueva configuración tenga efecto.
+
+### 3. Inicializar el Backend (Node.js)
 
 Abre una segunda terminal en la carpeta `backend-logistica` y ejecuta:
 
