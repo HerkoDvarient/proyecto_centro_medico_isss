@@ -1,125 +1,79 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../config/supabaseClient';
+
 const InventarioGeneral = () => {
     const [insumos, setInsumos] = useState([]);
     const [cargando, setCargando] = useState(true);
+    const [errorCarga, setErrorCarga] = useState('');
     
     //Estado para controlar el insumo que se está editando en la ventana Modal
     const [insumoEditando, setInsumoEditando] = useState(null);
 
-const obtenerDatos = async () => {
-    setCargando(true);
-
-    try {
-        // Obtener la sesión activa de Supabase
-        const {
-            data: { session },
-            error: errorSesion
-        } = await supabase.auth.getSession();
-
+    const fetchAutenticado = async (ruta, opciones = {}) => {
+        const { data: { session }, error: errorSesion } = await supabase.auth.getSession();
         if (errorSesion || !session?.access_token) {
-            throw new Error('No hay una sesión activa. Inicia sesión nuevamente.');
+            throw new Error('Sesión no disponible. Inicia sesión nuevamente.');
         }
 
-        // Consultar el inventario enviando el token
-        const respuesta = await fetch(
-            'http://localhost:3000/api/inventario',
-            {
-                headers: {
-                    Authorization: `Bearer ${session.access_token}`
-                }
-            }
-        );
-
-        if (!respuesta.ok) {
-            throw new Error(`Error del servidor: HTTP ${respuesta.status}`);
-        }
-
-        const datos = await respuesta.json();
-
-        if (!Array.isArray(datos)) {
-            throw new Error('El servidor no devolvió una lista válida.');
-        }
-
-        setInsumos(datos);
-
-        console.log(`Inventario cargado: ${datos.length} activos.`);
-
-    } catch (error) {
-        console.error('Error al obtener el inventario:', error);
-        setInsumos([]);
-    } finally {
-        setCargando(false);
-    }
-};
-
-useEffect(() => {
-    obtenerDatos();
-}, []);
-
-    //FUNCIÓN ELIMINAR
-    const handleEliminar = async (activo_fijo) => {
-        const confirmar = window.confirm(`¿Está seguro de que desea eliminar el insumo con Activo Fijo: ${activo_fijo}?`);
-        if (!confirmar) return;
-
-       try {
-    const {
-        data: { session },
-        error: errorSesion
-    } = await supabase.auth.getSession();
-
-    if (errorSesion || !session?.access_token) {
-        alert('Tu sesión ha expirado. Inicia sesión nuevamente.');
-        return;
-    }
-
-    const respuesta = await fetch(
-        `http://localhost:3000/api/inventario/eliminar/${encodeURIComponent(activo_fijo)}`,
-        {
-            method: 'DELETE',
+        const respuesta = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}${ruta}`, {
+            ...opciones,
             headers: {
+                ...(opciones.headers || {}),
                 Authorization: `Bearer ${session.access_token}`
             }
+        });
+
+        const datos = await respuesta.json().catch(() => null);
+        if (!respuesta.ok) {
+            throw new Error(datos?.mensaje || `Error HTTP ${respuesta.status}`);
         }
-    );
-
-    if (!respuesta.ok) {
-        const errorDatos = await respuesta.json().catch(() => ({}));
-        throw new Error(errorDatos.mensaje || `Error HTTP ${respuesta.status}`);
-    }
-
-    alert('Insumo eliminado con éxito.');
-    await obtenerDatos();
-
-} catch (error) {
-    console.error('Error al eliminar:', error);
-    alert(`No se pudo eliminar el insumo: ${error.message}`);
-}
+        return datos;
     };
 
-    //FUNCIÓN GUARDAR EDICIÓN
-  const handleGuardarEdicion = async (e) => {
-    e.preventDefault();
-
-    try {
-        const {
-            data: { session },
-            error: errorSesion
-        } = await supabase.auth.getSession();
-
-        if (errorSesion || !session?.access_token) {
-            alert('Tu sesión ha expirado. Inicia sesión nuevamente.');
-            return;
+    const obtenerDatos = async () => {
+        setCargando(true);
+        setErrorCarga('');
+        try {
+            const datos = await fetchAutenticado('/api/inventario');
+            if (!Array.isArray(datos)) {
+                throw new Error('El servidor no devolvió una lista de activos válida.');
+            }
+            setInsumos(datos);
+        } catch (error) {
+            console.error('Error al cargar inventario:', error);
+            setInsumos([]);
+            setErrorCarga(error.message);
+        } finally {
+            setCargando(false);
         }
+    };
 
-        const respuesta = await fetch(
-            `http://localhost:3000/api/inventario/editar/${encodeURIComponent(insumoEditando.activo_fijo)}`,
-            {
+    useEffect(() => {
+        obtenerDatos();
+    }, []);
+
+    // Eliminar un activo con autenticación
+    const handleEliminar = async (activo_fijo) => {
+        if (!window.confirm(`¿Está seguro de eliminar el activo fijo ${activo_fijo}?`)) return;
+        try {
+            await fetchAutenticado(`/api/inventario/eliminar/${encodeURIComponent(activo_fijo)}`, {
+                method: 'DELETE'
+            });
+            alert('Insumo eliminado con éxito.');
+            await obtenerDatos();
+        } catch (error) {
+            console.error('Error al eliminar:', error);
+            alert(error.message);
+        }
+    };
+
+    // Guardar edición con autenticación
+    const handleGuardarEdicion = async (e) => {
+        e.preventDefault();
+        try {
+            await fetchAutenticado(`/api/inventario/editar/${encodeURIComponent(insumoEditando.activo_fijo)}`, {
                 method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${session.access_token}`
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     activo_fijo: insumoEditando.activo_fijo,
                     numero_inventario: insumoEditando.numero_inventario,
@@ -128,29 +82,15 @@ useEffect(() => {
                     estado_fisico: insumoEditando.estado_fisico,
                     ubicacion: insumoEditando.ubicacion
                 })
-            }
-        );
-
-        if (!respuesta.ok) {
-            const errorDatos = await respuesta.json().catch(() => ({}));
-            throw new Error(
-                errorDatos.mensaje || `Error HTTP ${respuesta.status}`
-            );
+            });
+            alert('Insumo actualizado correctamente.');
+            setInsumoEditando(null);
+            await obtenerDatos();
+        } catch (error) {
+            console.error('Error al actualizar:', error);
+            alert(error.message);
         }
-
-        alert('Insumo actualizado correctamente.');
-
-        // Cerrar la ventana de edición
-        setInsumoEditando(null);
-
-        // Recargar el inventario
-        await obtenerDatos();
-
-    } catch (error) {
-        console.error('Error al actualizar:', error);
-        alert(`No se pudo actualizar el insumo: ${error.message}`);
-    }
-};
+    };
 
     const getEstadoStyle = (estado) => {
         const estiloBase = { padding: '6px 12px', borderRadius: '20px', color: 'white', fontWeight: 'bold', display: 'inline-block', fontSize: '0.85rem', minWidth: '80px', textAlign: 'center' };
@@ -168,8 +108,9 @@ useEffect(() => {
         <div style={{ padding: '20px', height: '100%', boxSizing: 'border-box' }}>
             <h2 style={{ marginTop: 0, marginBottom: '20px', color: '#1C3F8E' }}>Inventario General</h2>
             
+            {errorCarga && <p role="alert" style={{ color: '#b91c1c' }}>No se pudo cargar el inventario: {errorCarga}</p>}
             {cargando ? (
-                <p>Cargando datos del servidor logístico...</p>
+                <p>Cargando datos del servidor logÃstico...</p>
             ) : (
                 <div style={{ maxHeight: 'calc(100vh - 120px)', overflowY: 'auto', overflowX: 'auto', border: '1px solid #ddd', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'white', minWidth: '1000px' }}>
@@ -236,7 +177,7 @@ useEffect(() => {
                             <label><strong>Código CeCo</strong></label>
                             <input type="text" value={insumoEditando.centro_costo} onChange={(e) => setInsumoEditando({...insumoEditando, centro_costo: e.target.value})} style={inputStyle} required />
 
-                            <label><strong>Estado Físico</strong></label>
+                            <label><strong>Estado FÃsico</strong></label>
                             <select value={insumoEditando.estado_fisico || 'Bueno'} onChange={(e) => setInsumoEditando({...insumoEditando, estado_fisico: e.target.value})} style={inputStyle}>
                                 <option value="Bueno">Bueno</option>
                                 <option value="Regular">Regular</option>

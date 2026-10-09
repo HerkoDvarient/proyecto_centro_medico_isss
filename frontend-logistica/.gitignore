@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+#Cosas de Supabase
+.env
+.env.*
+!.env.example
+node_modules/
+dist/

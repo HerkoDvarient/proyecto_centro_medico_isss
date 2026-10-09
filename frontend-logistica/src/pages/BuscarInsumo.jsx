@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { supabase } from '../config/supabaseClient';
 
 const BuscarInsumo = () => {
     const [busqueda, setBusqueda] = useState('');
@@ -16,7 +17,27 @@ const BuscarInsumo = () => {
         setResultado(null);
 
         try {
-            const respuesta = await fetch(`http://localhost:3000/api/inventario/buscar/${busqueda.trim()}`);
+            const {
+    data: { session },
+    error: errorSesion
+} = await supabase.auth.getSession();
+
+if (errorSesion || !session?.access_token) {
+    throw new Error('Debes iniciar sesión nuevamente.');
+}
+
+const respuesta = await fetch(
+    `http://localhost:3000/api/inventario/buscar/${encodeURIComponent(busqueda.trim())}`,
+    {
+        headers: {
+            Authorization: `Bearer ${session.access_token}`
+        }
+    }
+);
+
+if (!respuesta.ok && respuesta.status !== 404) {
+    throw new Error(`Error al buscar: HTTP ${respuesta.status}`);
+}
             if (respuesta.status === 404) {
                 setError('No se encontró ningún insumo con ese código en la base de datos.');
                 setCargando(false);
@@ -38,17 +59,24 @@ const BuscarInsumo = () => {
         if (!confirmar) return;
 
         try {
-            const respuesta = await fetch(`http://localhost:3000/api/inventario/eliminar/${resultado.activo_fijo}`, {
-                method: 'DELETE'
-            });
+            const {
+    data: { session },
+    error: errorSesion
+} = await supabase.auth.getSession();
 
-            if (respuesta.ok) {
-                alert('Insumo eliminado con éxito.');
-                setResultado(null); //Se limpia la tarjeta
-                setBusqueda('');
-            } else {
-                alert('Error al intentar eliminar el insumo.');
-            }
+if (errorSesion || !session?.access_token) {
+    throw new Error('Debes iniciar sesión nuevamente.');
+}
+
+const respuesta = await fetch(
+    `http://localhost:3000/api/inventario/eliminar/${encodeURIComponent(resultado.activo_fijo)}`,
+    {
+        method: 'DELETE',
+        headers: {
+            Authorization: `Bearer ${session.access_token}`
+        }
+    }
+);
         } catch (err) {
             console.error(err);
             alert('Error de conexión.');
@@ -59,9 +87,20 @@ const BuscarInsumo = () => {
     const handleGuardarEdicion = async (e) => {
         e.preventDefault();
         try {
+            const {
+    data: { session },
+    error: errorSesion
+} = await supabase.auth.getSession();
+
+if (errorSesion || !session?.access_token) {
+    throw new Error('Debes iniciar sesión nuevamente.');
+}
             const respuesta = await fetch(`http://localhost:3000/api/inventario/editar/${insumoEditando.activo_fijo}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${session.access_token}`
+},
                 body: JSON.stringify({
                     activo_fijo: insumoEditando.activo_fijo,
                     numero_inventario: insumoEditando.numero_inventario,

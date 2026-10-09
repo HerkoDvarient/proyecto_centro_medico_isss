@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { supabase } from '../config/supabaseClient';
 
 const RegistrarInsumo = () => {
     const [formData, setFormData] = useState({
@@ -27,9 +28,20 @@ const RegistrarInsumo = () => {
         setMensaje({ tipo: '', texto: '' });
 
         try {
+            const {
+    data: { session },
+    error: errorSesion
+} = await supabase.auth.getSession();
+
+if (errorSesion || !session?.access_token) {
+    throw new Error('Debes iniciar sesión nuevamente.');
+}
             const respuesta = await fetch('http://localhost:3000/api/inventario/registrar', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${session.access_token}`
+},
                 body: JSON.stringify(formData)
             });
 

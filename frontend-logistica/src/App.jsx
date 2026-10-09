@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { supabase } from './config/supabaseClient';
+import Login from './pages/Login';
 import { LayoutDashboard, Search, PlusCircle, UserCircle } from 'lucide-react'; // Importamos los iconos
 import InventarioGeneral from './pages/InventarioGeneral';
 import BuscarInsumo from './pages/BuscarInsumo';
@@ -7,9 +9,49 @@ import RegistrarInsumo from './pages/RegistrarInsumo';
 export default function App() {
   const [activeTab, setActiveTab] = useState('inventario');
 
+  //Función para los inicios de sesión
+  
+const [sesion, setSesion] = useState(null);
+const [verificandoSesion, setVerificandoSesion] = useState(true);
+
+useEffect(() => {
+  let activo = true;
+
+  supabase.auth.getSession().then(({ data }) => {
+    if (activo) {
+      setSesion(data.session);
+      setVerificandoSesion(false);
+    }
+  }).catch(() => {
+    if (activo) setVerificandoSesion(false);
+  });
+
+  const { data: { subscription } } =
+    supabase.auth.onAuthStateChange((_evento, nuevaSesion) => {
+      if (activo) {
+        setSesion(nuevaSesion);
+        setVerificandoSesion(false);
+      }
+    });
+
+  return () => {
+    activo = false;
+    subscription.unsubscribe();
+  };
+}, []);
+
+if (verificandoSesion) {
+  return <p style={{ padding: '30px' }}>Verificando sesión...</p>;
+}
+
+if (!sesion) {
+  return <Login />;
+}
+
+
   //Función para manejar los estilos dinámicos de los botones de forma limpia
   const getNavStyle = (tabName) => {
-    const isActive = activeTab === tabName;http://localhost:5173/
+    const isActive = activeTab === tabName;
     return {
       display: 'flex',
       alignItems: 'center',
