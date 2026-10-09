@@ -182,7 +182,7 @@ Crear `backend-logistica/.env`:
 
 ```dotenv
 SUPABASE_URL=https://TU_PROYECTO.supabase.co
-SUPABASE_SECRET_KEY=TU_CLAVE_SECRETA
+SUPABASE_SECRET_KEY=CLAVE_SECRETA
 PORT=3000
 ```
 
@@ -208,7 +208,7 @@ Crear `frontend-logistica/.env.local`:
 
 ```dotenv
 VITE_SUPABASE_URL=https://TU_PROYECTO.supabase.co
-VITE_SUPABASE_PUBLISHABLE_KEY=TU_CLAVE_PUBLICA
+VITE_SUPABASE_PUBLISHABLE_KEY=CLAVE_PUBLICA
 VITE_API_URL=http://localhost:3000
 ```
 
@@ -322,7 +322,7 @@ La interfaz sigue una línea visual institucional con colores blanco, gris y azu
 - Validación integral de búsqueda, registro, edición y eliminación.
 - Roles y permisos administrativos.
 - Filtros, búsquedas avanzadas y paginación.
-- Mejoras de usabilidad móvil, incluyendo la opción de leer códigos de barra a través la camara del dispositivo.
+- Mejoras de usabilidad móvil, incluyendo la opción de leer códigos de barra a través de la cámara del dispositivo.
 - Validaciones y mensajes de error más claros.
 - Manejo de tiempos de espera cuando el backend se reactiva.
 - Copias de seguridad y pruebas de recuperación.
