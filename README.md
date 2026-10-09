@@ -1,206 +1,184 @@
-
 # Sistema de Monitoreo Logístico
 ## Unidad Médica de Cojutepeque
 
-###  Descripción del proyecto
+**Estado:** Desarrollo funcional con despliegue web operativo.
 
-Sistema web desarrollado para modernizar y centralizar la gestión del inventario de activos fijos de la Unidad Médica de Cojutepeque.
+**Aplicación:** https://proyecto-centro-medico-isss-dfij.vercel.app  
+**API REST:** https://proyecto-centro-medico-isss.onrender.com
 
-La aplicación facilita la consulta, organización y administración de información logística mediante una interfaz intuitiva, una API REST y una base de datos PostgreSQL alojada en Supabase.
+## 1. Descripción
 
-###  Estado actual del proyecto
+Sistema web para centralizar la consulta y administración del inventario de activos fijos de la Unidad Médica de Cojutepeque, El Salvador. Combina una interfaz React, una API REST desarrollada con Express y una base de datos PostgreSQL administrada por Supabase.
 
-**Estado:** Desarrollo funcional.
+La aplicación está publicada en Internet y puede utilizarse desde navegadores de computadora y dispositivos móviles, con inicio de sesión mediante Supabase Auth. No requiere mantener encendida la computadora de desarrollo.
 
-**Avances confirmados:**
+> **Alcance:** El acceso, la autenticación y la consulta del inventario están comprobados. Antes de utilizarlo como sistema institucional definitivo deben completarse las pruebas de escritura, la autorización por roles y las revisiones de seguridad.
 
-- Integración exitosa entre React, Express y Supabase.
-- Migración de la base de datos a PostgreSQL.
-- Recuperación de 767 registros de activos fijos.
-- Consulta de activos y sus respectivos centros de costo.
-- Visualización del Inventario General desde el navegador.
-- Comunicación funcional entre frontend y backend.
-- API REST operativa en el entorno local.
+## 2. Estado actual
 
-###  Módulos principales
+- Integración de **React + Vite**, **Node.js + Express** y **Supabase PostgreSQL**.
+- Migración y consulta comprobada de **767 activos fijos** y **10 centros de costo**.
+- Visualización del inventario general y su relación con centros de costo.
+- Autenticación y cierre de sesión mediante **Supabase Auth**.
+- Rutas del inventario protegidas mediante un token de acceso válido.
+- Frontend desplegado en **Vercel** y backend desplegado en **Render**.
+- Consulta del inventario comprobada desde diferentes navegadores y dispositivos.
+- Uso de variables de entorno para configurar los servicios sin publicar claves secretas.
 
-#### 1. Inventario General
+Los conteos indicados corresponden a los datos verificados durante el desarrollo y pueden cambiar.
 
-Módulo que presenta una tabla unificada con la información de los activos fijos.
+## 3. Módulos
 
-**Campos principales:**
+### Inventario General
 
-- Número de inventario.
-- Número de activo fijo.
-- Denominación.
-- Código del centro de costo (CeCo).
-- Denominación del centro de costo.
-- Estado físico.
-- Ubicación.
+Tabla de activos fijos con número de inventario, número de activo fijo, denominación, centro de costo, ubicación, estado físico y acciones. La consulta y visualización están verificadas.
 
-La interfaz contempla indicadores visuales para clasificar el estado de los activos como **Bueno, Regular o Descarte**.
+### Buscar Insumo
 
-**Estado:** Consulta y visualización funcionando.
+Búsqueda de activos por identificador y acceso a acciones de edición y eliminación. **Pendiente:** completar las pruebas funcionales y de permisos.
 
-#### 2. Buscar Insumo
+### Registrar Insumo
 
-Módulo diseñado para localizar activos mediante sus identificadores y consultar su información detallada.
+Formulario para incorporar activos y asociarlos con un centro de costo. **Pendiente:** completar las pruebas de registro, validación y permisos.
 
-Incluye opciones previstas para editar o eliminar registros.
+### Autenticación
 
-**Estado:** Interfaz y rutas definidas; pendientes de validación funcional completa.
+Inicio y cierre de sesión mediante Supabase Auth. El frontend obtiene un token de acceso y lo envía a la API en las solicitudes de inventario.
 
-#### 3. Registrar Insumo
+## 4. Tecnologías
 
-Formulario destinado al registro de nuevos activos fijos, incluyendo su asociación con un centro de costo.
+| Capa | Tecnología o servicio | Responsabilidad |
+|---|---|---|
+| Interfaz | React | Componentes y vistas del sistema |
+| Desarrollo y compilación | Vite | Servidor de desarrollo y compilación del frontend |
+| Servidor | Node.js | Entorno de ejecución del backend |
+| API | Express | Endpoints HTTP y lógica del servidor |
+| Base de datos | PostgreSQL | Persistencia de los registros |
+| Base de datos y autenticación | Supabase | PostgreSQL administrado y Supabase Auth |
+| Publicación del frontend | Vercel | Alojamiento de los archivos compilados |
+| Publicación del backend | Render | Ejecución de Node.js y la API REST |
+| Iconografía | Lucide React | Iconos de la interfaz |
+| Versionado | Git y GitHub | Historial del código y conexión con despliegues |
 
-**Estado:** Interfaz y ruta de registro definidas; pendiente de validación funcional y controles de autorización.
-
-###  Diseño e interfaz (UI/UX)
-
-La aplicación sigue una filosofía de **minimalismo institucional**, orientada a facilitar las tareas de administración logística.
-
-- **Paleta de colores:** Blanco, gris y azul institucional `#1C3F8E`.
-- **Iconografía:** Librería `lucide-react`.
-- **Navegación:** Menú lateral para acceder a los módulos.
-- **Tablas:** Presentación organizada de registros con desplazamiento.
-- **Diseño adaptable:** Mejoras de visualización móvil previstas.
-
-###  Tecnologías utilizadas
-
-| Componente | Tecnología |
-|---|---|
-| Frontend | React.js |
-| Herramienta de desarrollo | Vite |
-| Backend | Node.js |
-| Framework del servidor | Express.js |
-| Base de datos | PostgreSQL |
-| Servicio de base de datos | Supabase |
-| Comunicación | API REST |
-| Iconografía | Lucide React |
-| Control de versiones | Git y GitHub |
-
-###  Arquitectura del sistema
-
-El proyecto utiliza una arquitectura cliente-servidor.
+## 5. Arquitectura
 
 ```text
-             USUARIO
-                |
-                v
-       FRONTEND (REACT)
-          Vite + UI
-                |
-                | HTTP / JSON
-                v
-       BACKEND (EXPRESS)
-          Node.js API
-                |
-                | Supabase JS
-                v
-       SUPABASE POSTGRESQL
-                |
-         +------+------+
-         |             |
-         v             v
-    activos_fijos  centros_costo
+Usuario (PC o teléfono)
+          |
+          | HTTPS
+          v
+Vercel: React (compilado con Vite)
+          |                    \
+          | HTTPS + JSON        \ Inicio de sesión
+          | Token de acceso      v
+          v                 Supabase Auth
+Render: Node.js + Express
+       API REST
+          |
+          | Supabase JS
+          v
+Supabase: PostgreSQL
+          |
+          +-- activos_fijos
+          +-- centros_costo
 ```
 
-El backend organiza sus responsabilidades mediante rutas, controladores y modelos.
+**Flujo de consulta:**
 
-###  Estructura del proyecto
+1. El usuario abre la interfaz alojada en Vercel.
+2. Inicia sesión con Supabase Auth.
+3. React solicita `/api/inventario` al backend de Render y envía el token de acceso.
+4. Express valida la autenticación y consulta los datos en Supabase.
+5. La API devuelve una respuesta JSON y React presenta los registros.
+
+### ¿Qué es una API REST?
+
+Es la interfaz HTTP que permite al frontend solicitar información u operaciones al backend. **La API está programada con Express; Render es el servicio que la aloja.**
+
+### ¿Qué hace Vite?
+
+Vite proporciona el entorno de desarrollo local y compila el frontend mediante `npm run build`. **Vite no es un servidor de base de datos ni la API de producción.** Vercel publica el resultado compilado.
+
+### ¿Es un sistema gratuito o una API?
+
+**Es una aplicación web completa que incluye una API REST y utiliza servicios en la nube.** En la etapa de desarrollo se han empleado opciones gratuitas o de recursos limitados de Vercel, Render y Supabase. No son servidores dedicados propios ni implican disponibilidad o capacidad ilimitadas.
+
+## 6. Servicios y limitaciones
+
+| Plataforma | Función | Consideración |
+|---|---|---|
+| Vercel | Servir el frontend | Límites y condiciones según el plan |
+| Render | Ejecutar la API REST | En ciertos planes gratuitos puede suspender el servicio tras inactividad y tardar en reactivarse |
+| Supabase | PostgreSQL y autenticación | Cuotas, recursos y políticas de inactividad según el plan |
+| GitHub | Código fuente y versiones | Acceso sujeto a los permisos del repositorio |
+
+Los límites de cada proveedor pueden cambiar. Para uso institucional deben evaluarse disponibilidad, copias de seguridad, rendimiento, seguridad y condiciones comerciales.
+
+## 7. Estructura del repositorio
 
 ```text
 proyecto_centro_medico_isss/
-|
-|-- frontend-logistica/
-|   |-- src/
-|   |-- package.json
-|
-|-- backend-logistica/
-|   |-- src/
-|   |   |-- config/
-|   |   |   |-- db.js
-|   |   |
-|   |   |-- controllers/
-|   |   |   |-- inventarioController.js
-|   |   |
-|   |   |-- models/
-|   |   |   |-- inventarioModel.js
-|   |   |
-|   |   |-- routes/
-|   |       |-- inventarioRoutes.js
-|   |
-|   |-- server.js
-|   |-- .env
-|   |-- package.json
-|
-|-- .gitignore
-|-- README.md
+├── frontend-logistica/
+│   ├── src/
+│   │   ├── config/
+│   │   │   └── supabaseClient.js
+│   │   ├── pages/
+│   │   │   ├── Login.jsx
+│   │   │   ├── InventarioGeneral.jsx
+│   │   │   ├── BuscarInsumo.jsx
+│   │   │   └── RegistrarInsumo.jsx
+│   │   └── App.jsx
+│   └── package.json
+├── backend-logistica/
+│   ├── src/
+│   │   ├── config/db.js
+│   │   ├── controllers/inventarioController.js
+│   │   ├── models/inventarioModel.js
+│   │   └── routes/inventarioRoutes.js
+│   ├── server.js
+│   └── package.json
+├── .gitignore
+└── README.md
 ```
 
-**Nota:** El archivo `.env` debe existir únicamente en el entorno de ejecución y no debe subirse al repositorio.
+Los archivos de entorno locales no deben versionarse.
 
-###  Base de datos
+## 8. Base de datos
 
-La aplicación utiliza **Supabase PostgreSQL**.
+La base de datos utiliza **PostgreSQL alojado en Supabase**.
 
-#### Tabla: centros_costo
+**`centros_costo`**: `id_centro_costo`, `codigo_centro_costo`, `denominacion`.
 
-Almacena los centros de costo institucionales.
+**`activos_fijos`**: `numero_activo_fijo`, `numero_inventario`, `denominacion`, `id_centro_costo`, `estado_fisico`, `ubicado`.
 
-Campos principales:
+Las tablas se relacionan mediante `id_centro_costo`.
 
-- `id_centro_costo`
-- `codigo_centro_costo`
-- `denominacion`
+**Datos verificados:** 767 activos fijos y 10 centros de costo.
 
-#### Tabla: activos_fijos
+## 9. Instalación y ejecución local
 
-Almacena la información de los activos del inventario.
-
-Campos principales:
-
-- `numero_activo_fijo`
-- `numero_inventario`
-- `denominacion`
-- `id_centro_costo`
-- `estado_fisico`
-- `ubicado`
-
-Ambas tablas están relacionadas mediante `id_centro_costo`.
-
-**Datos verificados:**
-
-- 767 activos fijos consultados correctamente.
-- 10 centros de costo registrados durante la migración.
-
-###  Instalación y ejecución local
-
-#### Requisitos previos
+### Requisitos
 
 - Node.js y npm.
 - Git.
-- Acceso autorizado al proyecto de Supabase.
-- Credenciales de conexión correspondientes.
+- Acceso autorizado al repositorio privado y al proyecto Supabase.
+- Variables de entorno válidas.
 
-#### 1. Clonar el repositorio
+### 9.1. Clonar el proyecto
 
 ```bash
-git clone URL_DEL_REPOSITORIO
+git clone https://github.com/HerkoDvarient/proyecto_centro_medico_isss.git
 cd proyecto_centro_medico_isss
 ```
 
-#### 2. Configurar el backend
-
-Abrir una terminal en la carpeta del backend:
+### 9.2. Backend
 
 ```bash
 cd backend-logistica
 npm install
 ```
 
-Crear el archivo `.env`:
+Crear `backend-logistica/.env`:
 
 ```dotenv
 SUPABASE_URL=https://TU_PROYECTO.supabase.co
@@ -208,82 +186,154 @@ SUPABASE_SECRET_KEY=TU_CLAVE_SECRETA
 PORT=3000
 ```
 
-Las credenciales deben mantenerse privadas y no deben incluirse en el código fuente.
-
-Iniciar el servidor:
+Iniciar:
 
 ```bash
-node server.js
+npm start
 ```
 
-La API estará disponible en:
+API local: `http://localhost:3000`  
+Prueba de funcionamiento: `http://localhost:3000/api/test`
 
-http://localhost:3000
+### 9.3. Frontend
 
-#### 3. Configurar el frontend
-
-Abrir una segunda terminal desde la raíz del proyecto:
+Abrir otra terminal desde la raíz del repositorio:
 
 ```bash
 cd frontend-logistica
 npm install
+```
+
+Crear `frontend-logistica/.env.local`:
+
+```dotenv
+VITE_SUPABASE_URL=https://TU_PROYECTO.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=TU_CLAVE_PUBLICA
+VITE_API_URL=http://localhost:3000
+```
+
+Iniciar:
+
+```bash
 npm run dev
 ```
 
-La aplicación estará disponible normalmente en:
+La dirección habitual es `http://localhost:5173`. Para consultar el inventario localmente, el backend debe estar ejecutándose.
 
-http://localhost:5173
+> **Seguridad:** Las variables `VITE_` quedan disponibles en el frontend compilado. Nunca colocar claves secretas o privilegiadas en ellas. La clave `SUPABASE_SECRET_KEY` debe permanecer únicamente en el backend.
 
-**Importante:** El backend debe permanecer ejecutándose para que el frontend pueda consultar los datos.
+## 10. Endpoints de la API REST
 
-### 🔌 Endpoints de la API REST
-
-| Método | Endpoint | Función |
+| Método | Ruta | Función |
 |---|---|---|
-| GET | `/api/test` | Verificar el servidor |
-| GET | `/api/inventario` | Obtener el inventario general |
+| GET | `/api/test` | Verificar que el servidor responde |
+| GET | `/api/inventario` | Consultar el inventario |
 | GET | `/api/inventario/buscar/:codigo` | Buscar un activo |
 | POST | `/api/inventario/registrar` | Registrar un activo |
 | PUT | `/api/inventario/editar/:codigo` | Editar un activo |
 | DELETE | `/api/inventario/eliminar/:codigo` | Eliminar un activo |
 
-**Estado:** La consulta general está verificada. Las demás operaciones requieren pruebas adicionales y autorización antes de habilitarse en producción.
+Las rutas bajo `/api/inventario` requieren un token de acceso válido:
 
-###  Seguridad
+```http
+Authorization: Bearer TOKEN_DE_ACCESO
+```
 
-- Las credenciales de Supabase se administran mediante variables de entorno.
-- El archivo `.env` debe estar incluido en `.gitignore`.
-- Las claves privilegiadas de Supabase solo deben utilizarse en el backend.
-- El repositorio de GitHub debe mantenerse privado.
-- Las operaciones de escritura requieren autenticación y autorización antes del despliegue público.
-- No deben almacenarse contraseñas ni claves secretas en el repositorio.
+**Verificado:** `/api/test`, autenticación y consulta general. **Por validar:** pruebas completas de búsqueda, registro, edición, eliminación y autorización específica.
 
-###  Despliegue web
+## 11. Despliegue en Internet
 
-Se contempla publicar el sistema mediante servicios de alojamiento en la nube:
+### Frontend: Vercel
 
-| Componente | Plataforma prevista |
-|---|---|
-| Frontend | Vercel |
-| Backend | Render |
-| Base de datos | Supabase |
+- **URL:** https://proyecto-centro-medico-isss-dfij.vercel.app
+- **Directorio raíz:** `frontend-logistica`
+- **Build:** `npm run build`
+- **Directorio de salida:** `dist`
 
-El objetivo es permitir el acceso desde computadoras, teléfonos y tablets mediante una dirección HTTPS.
+Variables de entorno configuradas en Vercel:
 
-**Estado:** Despliegue pendiente de configuración y pruebas de seguridad.
+```dotenv
+VITE_SUPABASE_URL=https://TU_PROYECTO.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=TU_CLAVE_PUBLICA
+VITE_API_URL=https://proyecto-centro-medico-isss.onrender.com
+```
 
-###  Próximas mejoras
+Vite incorpora estas variables durante la compilación; después de cambiarlas, debe realizarse un nuevo despliegue.
 
-- Publicación de la aplicación en Internet.
-- Implementación de autenticación y permisos.
-- Pruebas de registro, búsqueda, edición y eliminación.
-- Mejoras en la presentación de tablas.
-- Optimización para dispositivos móviles.
-- Filtros y búsquedas avanzadas.
-- Validación de formularios.
-- Pruebas integrales del sistema.
+### Backend: Render
 
-###  Objetivo del proyecto
+- **URL:** https://proyecto-centro-medico-isss.onrender.com
+- **Directorio raíz:** `backend-logistica`
+- **Build:** `npm ci`
+- **Inicio:** `npm start`
 
-Contribuir a la modernización de los procesos logísticos de la Unidad Médica de Cojutepeque mediante una herramienta web que facilite el control, la consulta y la administración del inventario institucional.
+Variables de entorno configuradas en Render:
+
+```dotenv
+SUPABASE_URL=https://TU_PROYECTO.supabase.co
+SUPABASE_SECRET_KEY=TU_CLAVE_SECRETA
+NODE_ENV=production
+```
+
+Render proporciona la variable `PORT` en el entorno de despliegue.
+
+### Base de datos y autenticación: Supabase
+
+Supabase aloja PostgreSQL y administra el inicio de sesión. El backend utiliza la clave privada del servicio y valida el token del usuario antes de responder a las rutas de inventario.
+
+### Actualizaciones
+
+```text
+Cambios locales → Git commit → Git push → GitHub
+                                       |
+                                       +→ Vercel (frontend)
+                                       +→ Render (backend)
+```
+
+Los despliegues automáticos dependen de que ambas plataformas estén conectadas al repositorio y a la rama correspondiente.
+
+## 12. Seguridad y responsabilidades
+
+**Implementado:**
+
+- Inicio de sesión con Supabase Auth.
+- Validación de tokens para rutas de inventario.
+- Separación de configuración pública y claves secretas.
+- HTTPS en los servicios publicados.
+- Repositorio privado y exclusión de archivos `.env`.
+
+**Pendiente antes de producción institucional:**
+
+- Implementar **roles y permisos** por operación (lectura, registro, edición y eliminación).
+- Restringir el alta de usuarios a personas autorizadas.
+- Validar exhaustivamente los datos recibidos por formularios y API.
+- Revisar las políticas de acceso a datos y la configuración CORS.
+- Implementar y probar respaldos y restauración.
+- Realizar pruebas de seguridad y auditoría de operaciones.
+
+**Autenticación no equivale a autorización:** validar que una sesión existe no determina si ese usuario debe poder editar o eliminar registros.
+
+## 13. Diseño e interfaz
+
+La interfaz sigue una línea visual institucional con colores blanco, gris y azul (`#1C3F8E`), menú lateral, iconografía Lucide React, tablas de inventario e indicadores de estado. Se ha comprobado el acceso desde escritorio y móvil; permanecen previstas mejoras de adaptación para pantallas pequeñas.
+
+## 14. Próximas mejoras
+
+- Validación integral de búsqueda, registro, edición y eliminación.
+- Roles y permisos administrativos.
+- Filtros, búsquedas avanzadas y paginación.
+- Mejoras de usabilidad móvil, incluyendo la opción de leer códigos de barra a través la camara del dispositivo.
+- Validaciones y mensajes de error más claros.
+- Manejo de tiempos de espera cuando el backend se reactiva.
+- Copias de seguridad y pruebas de recuperación.
+- Pruebas de rendimiento, seguridad y funcionamiento.
+
+## 15. Objetivo
+
+Contribuir a la modernización de los procesos logísticos de la Unidad Médica de Cojutepeque mediante una aplicación web que centralice la consulta y administración del inventario institucional, integrando una interfaz moderna, una API REST y una base de datos PostgreSQL en la nube.
+
+---
+
+**Sistema de Monitoreo Logístico — Unidad Médica de Cojutepeque**  
+Proyecto de desarrollo de software con arquitectura cliente-servidor, autenticación y servicios en la nube.
 
