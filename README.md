@@ -66,7 +66,7 @@ La aplicación sigue una filosofía de **minimalismo institucional**, orientada 
 - **Tablas:** Presentación organizada de registros con desplazamiento.
 - **Diseño adaptable:** Mejoras de visualización móvil previstas.
 
-### 🛠️ Tecnologías utilizadas
+###  Tecnologías utilizadas
 
 | Componente | Tecnología |
 |---|---|
