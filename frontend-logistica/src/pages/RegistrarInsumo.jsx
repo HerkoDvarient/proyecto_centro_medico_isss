@@ -36,7 +36,7 @@ const RegistrarInsumo = () => {
 if (errorSesion || !session?.access_token) {
     throw new Error('Debes iniciar sesión nuevamente.');
 }
-            const respuesta = await fetch('http://localhost:3000/api/inventario/registrar', {
+            const respuesta = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/inventario/registrar`, {
                 method: 'POST',
                 headers: {
     'Content-Type': 'application/json',

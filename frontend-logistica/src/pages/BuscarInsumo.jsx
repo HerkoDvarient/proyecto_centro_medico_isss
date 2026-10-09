@@ -27,7 +27,7 @@ if (errorSesion || !session?.access_token) {
 }
 
 const respuesta = await fetch(
-    `http://localhost:3000/api/inventario/buscar/${encodeURIComponent(busqueda.trim())}`,
+    `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/inventario/buscar/${encodeURIComponent(busqueda.trim())}`,
     {
         headers: {
             Authorization: `Bearer ${session.access_token}`
@@ -69,7 +69,7 @@ if (errorSesion || !session?.access_token) {
 }
 
 const respuesta = await fetch(
-    `http://localhost:3000/api/inventario/eliminar/${encodeURIComponent(resultado.activo_fijo)}`,
+    `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/inventario/eliminar/${encodeURIComponent(resultado.activo_fijo)}`,
     {
         method: 'DELETE',
         headers: {
@@ -95,7 +95,7 @@ const respuesta = await fetch(
 if (errorSesion || !session?.access_token) {
     throw new Error('Debes iniciar sesión nuevamente.');
 }
-            const respuesta = await fetch(`http://localhost:3000/api/inventario/editar/${insumoEditando.activo_fijo}`, {
+            const respuesta = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/inventario/editar/${insumoEditando.activo_fijo}`, {
                 method: 'PUT',
                 headers: {
     'Content-Type': 'application/json',

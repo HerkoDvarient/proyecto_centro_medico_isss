@@ -23,7 +23,7 @@ const obtenerDatos = async () => {
 
         // Consultar el inventario enviando el token
         const respuesta = await fetch(
-            'http://localhost:3000/api/inventario',
+            `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/inventario`,
             {
                 headers: {
                     Authorization: `Bearer ${session.access_token}`
@@ -74,7 +74,7 @@ useEffect(() => {
     }
 
     const respuesta = await fetch(
-        `http://localhost:3000/api/inventario/eliminar/${encodeURIComponent(activo_fijo)}`,
+        `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/inventario/eliminar/${encodeURIComponent(activo_fijo)}`,
         {
             method: 'DELETE',
             headers: {
@@ -113,7 +113,7 @@ useEffect(() => {
         }
 
         const respuesta = await fetch(
-            `http://localhost:3000/api/inventario/editar/${encodeURIComponent(insumoEditando.activo_fijo)}`,
+            `${import.meta.env.VITE_API_URL || "http://localhost:3000"}/api/inventario/editar/${encodeURIComponent(insumoEditando.activo_fijo)}`,
             {
                 method: 'PUT',
                 headers: {
