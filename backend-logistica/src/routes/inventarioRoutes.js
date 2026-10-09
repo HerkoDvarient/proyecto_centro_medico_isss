@@ -1,21 +1,30 @@
 //backend-logistica/src/routes/inventarioRoutes.js
+
 const express = require('express');
 const router = express.Router();
+
 const inventarioController = require('../controllers/inventarioController');
 
-// RUTA: para obtener todos los insumos(Inventario General)
+const {
+    verificarAutenticacion
+} = require('../middlewares/authMiddleware');
+
+// Todas las rutas de inventario requieren autenticación.
+router.use(verificarAutenticacion);
+
+// CONSULTAR INVENTARIO
 router.get('/', inventarioController.getInventario);
 
-// RUTA: Buscar por código específico
+// BUSCAR ACTIVO
 router.get('/buscar/:codigo', inventarioController.buscarInsumo);
 
-// RUTA: Recibe datos para registrar mediante el método POST
+// REGISTRAR ACTIVO
 router.post('/registrar', inventarioController.registrarInsumo);
 
-// RUTA: Editar un insumo
+// EDITAR ACTIVO
 router.put('/editar/:codigo', inventarioController.editarInsumo);
 
-// RUTA: Eliminar un insumo
+// ELIMINAR ACTIVO
 router.delete('/eliminar/:codigo', inventarioController.borrarInsumo);
 
 module.exports = router;

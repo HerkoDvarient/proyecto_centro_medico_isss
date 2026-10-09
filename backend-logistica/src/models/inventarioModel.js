@@ -1,144 +1,328 @@
 //backend-logistica/src/models/inventarioModel.js
-const { sql, poolPromise } = require('../config/db');
 
-// FUNCIÓN: Obtener todos los insumos
+const { supabase } = require('../config/db');
+
+// =====================================================
+// CONFIGURACIÓN GENERAL
+// =====================================================
+
+const TAMANO_PAGINA = 500;
+
+const COLUMNAS = `
+    numero_activo_fijo,
+    numero_inventario,
+    denominacion,
+    estado_fisico,
+    ubicado,
+    centros_costo (
+        codigo_centro_costo,
+        denominacion
+    )
+`;
+
+// =====================================================
+// FUNCIONES AUXILIARES
+// =====================================================
+
+// Convertir el resultado de Supabase al formato de React
+const formatearInsumo = (activo) => ({
+    activo_fijo: activo.numero_activo_fijo,
+    numero_inventario: activo.numero_inventario,
+    denominacion: activo.denominacion,
+    centro_costo: activo.centros_costo?.codigo_centro_costo ?? null,
+    denom_ceco: activo.centros_costo?.denominacion ?? null,
+    estado_fisico: activo.estado_fisico,
+    ubicacion: activo.ubicado
+});
+
+// Verificar errores devueltos por Supabase
+const verificarError = (error) => {
+    if (error) {
+        console.error('Error de Supabase:', error);
+        throw error;
+    }
+};
+
+// Crear errores personalizados
+const crearError = (codigo, mensaje) => {
+    const error = new Error(mensaje);
+    error.code = codigo;
+    return error;
+};
+
+// Buscar el ID de un centro de costo
+const obtenerIdCentroCosto = async (codigo) => {
+    if (typeof codigo !== 'string' || !codigo.trim()) {
+        throw crearError(
+            'CECO_NO_EXISTE',
+            'Debes proporcionar un Código CeCo válido.'
+        );
+    }
+
+    const { data, error } = await supabase
+        .from('centros_costo')
+        .select('id_centro_costo')
+        .eq('codigo_centro_costo', codigo.trim())
+        .maybeSingle();
+
+    verificarError(error);
+
+    if (!data) {
+        throw crearError(
+            'CECO_NO_EXISTE',
+            'El Código CeCo ingresado no existe en el catálogo.'
+        );
+    }
+
+    return data.id_centro_costo;
+};
+
+// Buscar por coincidencia exacta en ambos identificadores
+// Se usan filtros .eq() independientes para evitar
+// insertar texto del usuario en la sintaxis de .or()
+const buscarCoincidencias = async (codigo, columnas = COLUMNAS) => {
+    if (typeof codigo !== 'string' || !codigo.trim()) {
+        throw crearError(
+            'CODIGO_INVALIDO',
+            'Debes proporcionar un código válido.'
+        );
+    }
+
+    const valor = codigo.trim();
+
+    const [porActivo, porInventario] = await Promise.all([
+        supabase
+            .from('activos_fijos')
+            .select(columnas)
+            .eq('numero_activo_fijo', valor),
+
+        supabase
+            .from('activos_fijos')
+            .select(columnas)
+            .eq('numero_inventario', valor)
+    ]);
+
+    verificarError(porActivo.error);
+    verificarError(porInventario.error);
+
+    const encontrados = new Map();
+
+    for (const activo of [
+        ...(porActivo.data || []),
+        ...(porInventario.data || [])
+    ]) {
+        encontrados.set(activo.numero_activo_fijo, activo);
+    }
+
+    return Array.from(encontrados.values());
+};
+
+// Encontrar un único activo para editar o eliminar
+const encontrarActivo = async (codigo) => {
+    const coincidencias = await buscarCoincidencias(
+        codigo,
+        'numero_activo_fijo, numero_inventario'
+    );
+
+    if (coincidencias.length === 0) {
+        throw crearError(
+            'ACTIVO_NO_EXISTE',
+            'El activo solicitado no existe.'
+        );
+    }
+
+    if (coincidencias.length > 1) {
+        throw crearError(
+            'CODIGO_AMBIGUO',
+            'El código coincide con varios activos.'
+        );
+    }
+
+    return coincidencias[0].numero_activo_fijo;
+};
+
+// =====================================================
+// 1. OBTENER TODOS LOS INSUMOS
+// =====================================================
+
 const obtenerTodosLosInsumos = async () => {
     try {
-        const pool = await poolPromise;
-        const resultado = await pool.request().query(`
-            SELECT 
-                af.numero_activo_fijo AS activo_fijo,
-                af.numero_inventario,
-                af.denominacion, 
-                cc.codigo_centro_costo AS centro_costo, 
-                cc.denominacion AS denom_ceco,
-                af.estado_fisico,
-                af.ubicado AS ubicacion
-            FROM activos_fijos AS af
-            LEFT JOIN centros_costo AS cc 
-                ON af.id_centro_costo = cc.id_centro_costo
-        `);
-        return resultado.recordset; 
+        const todos = [];
+        let inicio = 0;
+
+        while (true) {
+            const { data, error } = await supabase
+                .from('activos_fijos')
+                .select(COLUMNAS)
+                .order('numero_activo_fijo', {
+                    ascending: true
+                })
+                .range(
+                    inicio,
+                    inicio + TAMANO_PAGINA - 1
+                );
+
+            verificarError(error);
+
+            const registros = data || [];
+
+            todos.push(...registros);
+
+            if (registros.length < TAMANO_PAGINA) {
+                break;
+            }
+
+            inicio += TAMANO_PAGINA;
+        }
+
+        console.log(
+            `Inventario consultado: ${todos.length} activos.`
+        );
+
+        return todos.map(formatearInsumo);
+
     } catch (error) {
-        console.error('Error en inventarioModel:', error);
-        throw new Error('Error al ejecutar la consulta en la base de datos');
+        console.error('Error al obtener inventario:', error);
+        throw error;
     }
 };
 
-// FUNCIÓN: Buscar por código
+// =====================================================
+// 2. BUSCAR UN INSUMO POR CÓDIGO
+// =====================================================
+
 const buscarInsumoPorCodigo = async (codigo) => {
     try {
-        const pool = await poolPromise;
-        const resultado = await pool.request()
-            .input('codigo', sql.VarChar, codigo) //Pasa el dato de forma segura
-            .query(`
-                SELECT 
-                    af.numero_activo_fijo AS activo_fijo,
-                    af.numero_inventario,
-                    af.denominacion, 
-                    cc.codigo_centro_costo AS centro_costo, 
-                    cc.denominacion AS denom_ceco,
-                    af.estado_fisico,
-                    af.ubicado AS ubicacion
-                FROM activos_fijos AS af
-                LEFT JOIN centros_costo AS cc 
-                    ON af.id_centro_costo = cc.id_centro_costo
-                WHERE af.numero_inventario = @codigo OR af.numero_activo_fijo = @codigo
-            `);
-        return resultado.recordset; 
+        const encontrados = await buscarCoincidencias(codigo);
+
+        return encontrados.map(formatearInsumo);
+
     } catch (error) {
-        console.error('Error al buscar en inventarioModel:', error);
-        throw new Error('Error al buscar en la base de datos');
+        console.error('Error al buscar activo:', error);
+        throw error;
     }
 };
 
-// FUNCIÓN: Registrar un nuevo insumo
+// =====================================================
+// 3. REGISTRAR NUEVO INSUMO
+// =====================================================
+
 const registrarNuevoInsumo = async (datos) => {
     try {
-        const pool = await poolPromise;
-        const resultado = await pool.request()
-            .input('numero_activo_fijo', sql.VarChar, datos.activo_fijo)
-            .input('numero_inventario', sql.VarChar, datos.numero_inventario)
-            .input('denominacion', sql.VarChar, datos.denominacion)
-            .input('codigo_centro_costo', sql.VarChar, datos.codigo_centro_costo)
-            .input('estado_fisico', sql.VarChar, datos.estado_fisico)
-            .input('ubicado', sql.VarChar, datos.ubicacion)
-            .query(`
-                INSERT INTO activos_fijos (
-                    numero_activo_fijo, 
-                    numero_inventario, 
-                    denominacion, 
-                    id_centro_costo, 
-                    estado_fisico, 
-                    ubicado
-                )
-                VALUES (
-                    @numero_activo_fijo, 
-                    @numero_inventario, 
-                    @denominacion, 
-                    (SELECT id_centro_costo FROM centros_costo WHERE codigo_centro_costo = @codigo_centro_costo), 
-                    @estado_fisico, 
-                    @ubicado
-                )
-            `);
-        return resultado;
-    } catch (error) {
-        console.error('Error al registrar en inventarioModel:', error);
-        throw error; //Re lanza el error original con códigos de SQL Server
-    }
-};
+        const idCentroCosto = await obtenerIdCentroCosto(
+            datos.codigo_centro_costo
+        );
 
-// FUNCIÓN: Actualizar/Editar datos de un insumo
-const actualizarInsumo = async (codigoIdentificador, datos) => {
-    try {
-        const pool = await poolPromise;
-        const resultado = await pool.request()
-            .input('codigoIdentificador', sql.VarChar, codigoIdentificador)
-            .input('numero_activo_fijo', sql.VarChar, datos.activo_fijo)
-            .input('numero_inventario', sql.VarChar, datos.numero_inventario)
-            .input('denominacion', sql.VarChar, datos.denominacion)
-            .input('codigo_centro_costo', sql.VarChar, datos.codigo_centro_costo)
-            .input('estado_fisico', sql.VarChar, datos.estado_fisico)
-            .input('ubicado', sql.VarChar, datos.ubicacion)
-            .query(`
-                UPDATE activos_fijos
-                SET 
-                    numero_activo_fijo = @numero_activo_fijo,
-                    numero_inventario = @numero_inventario,
-                    denominacion = @denominacion,
-                    id_centro_costo = (SELECT id_centro_costo FROM centros_costo WHERE codigo_centro_costo = @codigo_centro_costo),
-                    estado_fisico = @estado_fisico,
-                    ubicado = @ubicado
-                WHERE numero_activo_fijo = @codigoIdentificador OR numero_inventario = @codigoIdentificador
-            `);
-        return resultado;
+        const nuevoActivo = {
+            numero_activo_fijo: datos.activo_fijo,
+            numero_inventario: datos.numero_inventario || null,
+            denominacion: datos.denominacion,
+            id_centro_costo: idCentroCosto,
+            estado_fisico: datos.estado_fisico || null,
+            ubicado: datos.ubicacion || null
+        };
+
+        const { data, error } = await supabase
+            .from('activos_fijos')
+            .insert(nuevoActivo)
+            .select('numero_activo_fijo')
+            .single();
+
+        verificarError(error);
+
+        return data;
+
     } catch (error) {
-        console.error('Error al actualizar en inventarioModel:', error);
+        console.error('Error al registrar activo:', error);
         throw error;
     }
 };
 
-// FUNCIÓN: Eliminar un insumo
+// =====================================================
+// 4. ACTUALIZAR / EDITAR INSUMO
+// =====================================================
+
+const actualizarInsumo = async (codigo, datos) => {
+    try {
+        const activoOriginal = await encontrarActivo(codigo);
+
+        const idCentroCosto = await obtenerIdCentroCosto(
+            datos.codigo_centro_costo
+        );
+
+        const datosActualizados = {
+            numero_activo_fijo: datos.activo_fijo,
+            numero_inventario: datos.numero_inventario || null,
+            denominacion: datos.denominacion,
+            id_centro_costo: idCentroCosto,
+            estado_fisico: datos.estado_fisico || null,
+            ubicado: datos.ubicacion || null
+        };
+
+        const { data, error } = await supabase
+            .from('activos_fijos')
+            .update(datosActualizados)
+            .eq('numero_activo_fijo', activoOriginal)
+            .select('numero_activo_fijo')
+            .maybeSingle();
+
+        verificarError(error);
+
+        if (!data) {
+            throw crearError(
+                'ACTIVO_NO_EXISTE',
+                'No se encontró el activo para actualizar.'
+            );
+        }
+
+        return data;
+
+    } catch (error) {
+        console.error('Error al actualizar activo:', error);
+        throw error;
+    }
+};
+
+// =====================================================
+// 5. ELIMINAR INSUMO
+// =====================================================
+
 const eliminarInsumo = async (codigo) => {
     try {
-        const pool = await poolPromise;
-        const resultado = await pool.request()
-            .input('codigo', sql.VarChar, codigo)
-            .query(`
-                DELETE FROM activos_fijos 
-                WHERE numero_activo_fijo = @codigo OR numero_inventario = @codigo
-            `);
-        return resultado;
+        const activoOriginal = await encontrarActivo(codigo);
+
+        const { data, error } = await supabase
+            .from('activos_fijos')
+            .delete()
+            .eq('numero_activo_fijo', activoOriginal)
+            .select('numero_activo_fijo')
+            .maybeSingle();
+
+        verificarError(error);
+
+        if (!data) {
+            throw crearError(
+                'ACTIVO_NO_EXISTE',
+                'No se encontró el activo para eliminar.'
+            );
+        }
+
+        return data;
+
     } catch (error) {
-        console.error('Error al eliminar en inventarioModel:', error);
+        console.error('Error al eliminar activo:', error);
         throw error;
     }
 };
+
+// =====================================================
+// EXPORTACIÓN DE FUNCIONES
+// =====================================================
 
 module.exports = {
     obtenerTodosLosInsumos,
     buscarInsumoPorCodigo,
     registrarNuevoInsumo,
-    actualizarInsumo, 
-    eliminarInsumo    //Se exportan las funciones
+    actualizarInsumo,
+    eliminarInsumo
 };

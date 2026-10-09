@@ -1,31 +1,52 @@
 // backend-logistica/src/config/db.js
-const sql = require('mssql');
+
+const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
-//Configuración para SQL Server
-const dbSettings = {
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    server: process.env.DB_SERVER,
-    database: process.env.DB_NAME,
-    options: {
-        encrypt: false, //Falso(para desarrollo local)
-        trustServerCertificate: true //Evitando errores de certificados locales
+// Variables de entorno
+const supabaseUrl = process.env.SUPABASE_URL?.trim();
+const supabaseKey = process.env.SUPABASE_SECRET_KEY?.trim();
+
+// Verificar configuración
+if (!supabaseUrl || !supabaseKey) {
+    throw new Error(
+        'Faltan las credenciales de Supabase en el archivo .env'
+    );
+}
+
+// Validar URL
+let url;
+
+try {
+    url = new URL(supabaseUrl);
+} catch (error) {
+    throw new Error('SUPABASE_URL no contiene una URL válida.');
+}
+
+if (
+    url.protocol !== 'https:' ||
+    url.pathname !== '/' ||
+    url.search ||
+    url.hash
+) {
+    throw new Error(
+        'SUPABASE_URL debe contener únicamente la URL base HTTPS del proyecto.'
+    );
+}
+
+// Crear cliente Supabase
+const supabase = createClient(
+    url.origin,
+    supabaseKey,
+    {
+        auth: {
+            persistSession: false,
+            autoRefreshToken: false
+        }
     }
-};
+);
 
-//Promesa de conexión
-const poolPromise = new sql.ConnectionPool(dbSettings)
-    .connect()
-    .then(pool => {
-        console.log('¡Base de datos SQL Server (InventarioISSS) conectada exitosamente!');
-        return pool;
-    })
-    .catch(err => {
-        console.error('Error al conectar con SQL Server:', err.message);
-    });
+console.log('Cliente de Supabase configurado correctamente');
+console.log('Proyecto Supabase:', url.hostname);
 
-module.exports = {
-    sql,
-    poolPromise
-};
+module.exports = { supabase };

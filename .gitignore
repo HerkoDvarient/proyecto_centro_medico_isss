@@ -1,2 +1,15 @@
-node_modules/ 
+
+# Dependencias
+node_modules/
+
+# Credenciales y variables de entorno
 .env
+.env.*
+!.env.example
+
+# Archivos generados
+dist/
+build/
+
+# Logs
+*.log
